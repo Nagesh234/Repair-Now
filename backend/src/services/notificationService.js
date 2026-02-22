@@ -1,29 +1,33 @@
 const admin = require('firebase-admin');
 
-// Note: Ensure GOOGLE_APPLICATION_CREDENTIALS environment variable is set 
-// OR path to serviceAccountKey.json is provided here.
-// For now, we'll try to initialize with default credentials or check if file exists.
+// Firebase Admin is optional — if GOOGLE_APPLICATION_CREDENTIALS or
+// FIREBASE_SERVICE_ACCOUNT_JSON env var is not set, notifications are silently skipped.
+let firebaseInitialized = false;
 
 try {
-    // If you have a specific serviceAccountKey.json, require it:
-    // const serviceAccount = require('../../serviceAccountKey.json');
-    // admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 
-    // Using simple initialization (works if GOOGLE_APPLICATION_CREDENTIALS is set)
-    admin.initializeApp();
-    console.log('Firebase Admin Initialized');
+    if (serviceAccountJson) {
+        const serviceAccount = JSON.parse(serviceAccountJson);
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+        firebaseInitialized = true;
+        console.log('Firebase Admin initialized via FIREBASE_SERVICE_ACCOUNT_JSON');
+    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        admin.initializeApp();
+        firebaseInitialized = true;
+        console.log('Firebase Admin initialized via GOOGLE_APPLICATION_CREDENTIALS');
+    } else {
+        console.warn('⚠️  Firebase Admin not initialized: no credentials found. Push notifications will be disabled.');
+    }
 } catch (error) {
-    console.warn('Firebase Admin Initialization Failed (Notifications will not work):', error.message);
+    console.warn('⚠️  Firebase Admin initialization failed (notifications disabled):', error.message);
 }
 
 exports.sendNotification = async (fcmToken, title, body) => {
-    if (!fcmToken) return;
+    if (!fcmToken || !firebaseInitialized) return;
 
     const message = {
-        notification: {
-            title: title,
-            body: body
-        },
+        notification: { title, body },
         token: fcmToken
     };
 
@@ -33,34 +37,28 @@ exports.sendNotification = async (fcmToken, title, body) => {
         return response;
     } catch (error) {
         console.error('Error sending message:', error);
-        // Don't throw, just log, so flow doesn't break
+        // Don't throw — notification failure should not break core flow
     }
 };
 
 exports.sendMulticastNotification = async (fcmTokens, title, body) => {
-    if (!fcmTokens || fcmTokens.length === 0) return;
+    if (!fcmTokens || fcmTokens.length === 0 || !firebaseInitialized) return;
 
     const message = {
-        notification: {
-            title: title,
-            body: body
-        },
+        notification: { title, body },
         tokens: fcmTokens
     };
 
     try {
-        const response = await admin.messaging().sendMulticast(message);
-        console.log(response.successCount + ' messages were sent successfully');
+        const response = await admin.messaging().sendEachForMulticast(message);
+        console.log(`${response.successCount} messages sent successfully`);
         if (response.failureCount > 0) {
-            const failedTokens = [];
-            response.responses.forEach((resp, idx) => {
-                if (!resp.success) {
-                    failedTokens.push(fcmTokens[idx]);
-                }
-            });
-            console.log('List of tokens that caused failures: ' + failedTokens);
+            const failedTokens = response.responses
+                .map((resp, idx) => (!resp.success ? fcmTokens[idx] : null))
+                .filter(Boolean);
+            console.warn('Failed tokens:', failedTokens);
         }
     } catch (error) {
         console.error('Error sending multicast message:', error);
     }
-}
+};
