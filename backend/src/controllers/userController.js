@@ -122,3 +122,92 @@ exports.approveKyc = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// In-memory OTP store (keyed by email or phone): { otp, expiresAt }
+const otpStore = {};
+
+// POST /api/auth/check-unique
+// Body: { email?, phone_number? }
+exports.checkUniqueness = async (req, res) => {
+    const { email, phone_number } = req.body;
+
+    if (!email && !phone_number) {
+        return res.status(400).json({ error: 'Provide email or phone_number to check' });
+    }
+
+    try {
+        const results = {};
+
+        if (email) {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', email)
+                .maybeSingle();
+            if (error) throw error;
+            results.email = { available: !data };
+        }
+
+        if (phone_number) {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('phone_number', phone_number)
+                .maybeSingle();
+            if (error) throw error;
+            results.phone_number = { available: !data };
+        }
+
+        return res.status(200).json(results);
+    } catch (error) {
+        console.error('Check Uniqueness Error:', error);
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+// POST /api/auth/send-otp
+// Body: { email }
+exports.sendOTP = async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'email is required' });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    otpStore[email] = { otp, expiresAt };
+
+    // TODO: Integrate real email service (e.g. Resend, SendGrid) to send OTP
+    console.log(`OTP for ${email}: ${otp}`); // Log for testing
+
+    return res.status(200).json({ message: 'OTP sent successfully' });
+};
+
+// POST /api/auth/verify-otp
+// Body: { email, otp }
+exports.verifyOTP = async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return res.status(400).json({ error: 'email and otp are required' });
+    }
+
+    const record = otpStore[email];
+
+    if (!record) {
+        return res.status(400).json({ error: 'No OTP found for this email. Please request a new one.' });
+    }
+
+    if (Date.now() > record.expiresAt) {
+        delete otpStore[email];
+        return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+    }
+
+    if (record.otp !== otp.toString()) {
+        return res.status(400).json({ error: 'Invalid OTP' });
+    }
+
+    delete otpStore[email];
+    return res.status(200).json({ message: 'OTP verified successfully' });
+};
