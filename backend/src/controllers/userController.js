@@ -1,5 +1,6 @@
 const supabase = require('../config/supabase');
 const multer = require('multer');
+const emailService = require('../services/emailService');
 
 // Configure Multer to store files in memory
 const storage = multer.memoryStorage();
@@ -178,8 +179,12 @@ exports.sendOTP = async (req, res) => {
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
     otpStore[email] = { otp, expiresAt };
 
-    // TODO: Integrate real email service (e.g. Resend, SendGrid) to send OTP
-    console.log(`OTP for ${email}: ${otp}`); // Log for testing
+    try {
+        await emailService.sendOTPEmail(email, otp);
+    } catch (err) {
+        console.error('Failed to send OTP email:', err.message);
+        // Don't block — OTP is stored; user can retry
+    }
 
     return res.status(200).json({ message: 'OTP sent successfully' });
 };

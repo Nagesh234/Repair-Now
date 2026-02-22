@@ -26,11 +26,13 @@ const authRoutes = require('./routes/auth');
 const repairRoutes = require('./routes/repairs');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
+const paymentRoutes = require('./routes/payments');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/repairs', repairRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/payments', paymentRoutes);
 
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
