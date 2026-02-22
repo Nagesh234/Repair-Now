@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  network_security_config.xml — Repair Now Client App
+  ─────────────────────────────────────────────────────
+  Defines the app's network security policy.
+
+  Rules:
+    • In PRODUCTION (release):
+        - HTTPS only. Clear-text (HTTP) traffic is blocked.
+        - Prevents man-in-the-middle attacks and accidental data leaks.
+
+    • In DEVELOPMENT (debug):
+        - The Android emulator's loopback alias (10.0.2.2) is
+          allowed over HTTP so the app can reach a local dev server.
+        - 10.0.2.2 is NEVER reachable from a physical device on a
+          real network, so this poses no security risk.
+
+  Google Play policy note:
+    Blocking clear-text traffic in release builds is a Google Play
+    requirement for apps targeting API 28+ (Android 9+).
+
+  Referenced from AndroidManifest.xml:
+    android:networkSecurityConfig="@xml/network_security_config"
+-->
+<network-security-config>
+
+    <!-- ── PRODUCTION: Trust only official CAs (default behavior) ──────── -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust the system certificate store (CAs pre-installed on the device) -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- ── DEVELOPMENT ONLY: Allow HTTP to the Android emulator host ───── -->
+    <!-- Remove or comment this block before releasing to the Play Store.   -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- 10.0.2.2 is the Android emulator's alias for localhost (127.0.0.1) -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+
+</network-security-config>

@@ -1,0 +1,45 @@
+# ─── Repair Now — Root .gitignore ────────────────────────────────────────────
+# Covers the entire monorepo workspace: backend, client-rn, partner-rn
+
+# ─── Node.js ─────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log
+yarn-error.log
+.yarn/
+
+# ─── Environment Variables ────────────────────────────────────────────────────
+# NEVER commit .env — copy from .env.example
+.env
+.env.example
+.env.local
+.env.production
+
+# ─── React Native ────────────────────────────────────────────────────────────
+*.keystore
+!debug.keystore
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+ios/build/
+ios/Pods/
+DerivedData/
+.metro-health-check*
+.metro_cache/
+
+# ─── TypeScript ──────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─── OS Artifacts ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Editor ──────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ─── Test Coverage ───────────────────────────────────────────────────────────
+coverage/
+.env

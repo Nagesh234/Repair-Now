@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  network_security_config.xml — Repair Now Partner App
+  ─────────────────────────────────────────────────────
+  Defines the app's network security policy.
+
+  Rules:
+    • PRODUCTION (release): HTTPS only — clear-text HTTP is blocked.
+    • DEVELOPMENT (debug): HTTP allowed to 10.0.2.2 (emulator localhost alias).
+
+  Google Play policy note:
+    Blocking clear-text traffic is required for apps targeting API 28+.
+
+  Referenced from AndroidManifest.xml:
+    android:networkSecurityConfig="@xml/network_security_config"
+-->
+<network-security-config>
+
+    <!-- PRODUCTION: trust only system CAs, no clear-text traffic -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- DEVELOPMENT ONLY: allow HTTP to emulator localhost.
+         Remove before Play Store release. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+
+</network-security-config>

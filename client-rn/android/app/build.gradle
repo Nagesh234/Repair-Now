@@ -1,0 +1,66 @@
+/**
+ * app/build.gradle — Repair Now Client App
+ *
+ * Configures the Android app module:
+ *  - applicationId: unique identifier on Google Play
+ *  - targetSdkVersion 34: required for 2024 Play Store submissions
+ *  - Firebase + React Native Gradle plugin applied here
+ *
+ * Google Play policy note:
+ *  targetSdkVersion must be ≥ 34 for new apps from 2024.
+ */
+apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
+apply plugin: "com.google.gms.google-services"  // Firebase
+
+react {
+    // React Native Gradle plugin auto-configuration
+    // autolinkLibraries is handled via settings.gradle
+}
+
+android {
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace "com.repairnow.client"
+    defaultConfig {
+        applicationId "com.repairnow.client"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            // Minification and shrinking for Play Store builds
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.debug  // Replace with release signing config before publishing
+        }
+    }
+}
+
+dependencies {
+    // React Native core
+    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:hermes-android")
+
+    // Firebase BoM — manages consistent Firebase SDK versions
+    implementation platform("com.google.firebase:firebase-bom:32.7.2")
+    implementation "com.google.firebase:firebase-messaging"
+}

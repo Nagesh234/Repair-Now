@@ -1,0 +1,25 @@
+// Top-level build file for the Repair Now Client App.
+// Configures project-wide build plugins and repositories.
+
+buildscript {
+    ext {
+        buildToolsVersion = "34.0.0"
+        minSdkVersion = 23        // Android 6.0+ — covers 99%+ of active devices
+        compileSdkVersion = 34    // Required for 2024 Google Play submissions
+        targetSdkVersion = 34     // Google Play requires targetSdk >= 34 from Aug 2024
+        ndkVersion = "26.1.10909125"
+        kotlinVersion = "1.9.22"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.3.0")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        // Google Services — required for Firebase (FCM push notifications)
+        classpath("com.google.gms:google-services:4.4.1")
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"

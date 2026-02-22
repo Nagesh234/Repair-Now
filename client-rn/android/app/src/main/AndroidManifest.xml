@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AndroidManifest.xml — Repair Now Client App
+  ─────────────────────────────────────────────
+  Google Play Policy compliance notes:
+    • INTERNET and POST_NOTIFICATIONS are the only dangerous perms in Client app.
+    • Avatar photo upload uses the Android Photo Picker (no runtime permission needed on API 33+).
+    • android:exported="true" is set on MainActivity (required for apps targeting API 31+).
+    • FirebaseMessagingService is exported="false" per FCM documentation.
+    • android:allowBackup="false" prevents sensitive session data appearing in ADB backups.
+    • targetSdkVersion must be ≥ 34 for 2024 Play Store submissions (set in build.gradle).
+    • Google Maps API key is declared in meta-data so react-native-maps can initialise the SDK.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ─── Permissions ─────────────────────────────────────────────── -->
+
+    <!-- Required for all API calls to the backend -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Required on Android 13+ (API 33) to display push notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- ─── Application ─────────────────────────────────────────────── -->
+
+    <application
+        android:name=".MainApplication"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:allowBackup="false"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:usesCleartextTraffic="false">
+
+        <!-- ─── Main Activity ──────────────────────────────────────── -->
+        <!--
+            android:exported="true" is REQUIRED when targeting API 31+
+            for any activity that has an intent-filter (Play Store enforcement).
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ─── Firebase Cloud Messaging Service ─────────────────── -->
+        <!--
+            android:exported="false" — this service should only be triggered
+            by the Firebase SDK internally, never by external apps.
+        -->
+        <service
+            android:name="io.invertase.firebase.messaging.ReactNativeFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- ─── Google Maps SDK API Key ───────────────────────────── -->
+        <!--
+            Required by react-native-maps to initialise the Google Maps SDK.
+            Replace YOUR_GOOGLE_MAPS_API_KEY below with the actual key from
+            https://console.cloud.google.com → APIs & Services → Credentials.
+            Restrict the key to Android apps (package: com.repairNowclient).
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
+
+    </application>
+
+</manifest>

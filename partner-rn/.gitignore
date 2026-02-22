@@ -1,0 +1,34 @@
+# ─── React Native — .gitignore ──────────────────────────────────────────────
+# Keeps the partner-rn repository clean.
+
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.yarn/
+
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+*.keystore
+!debug.keystore
+
+ios/build/
+ios/Pods/
+DerivedData/
+
+.metro-health-check*
+.metro_cache/
+*.tsbuildinfo
+
+# Never commit .env — copy from .env.example
+.env
+.env.local
+.env.production
+
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+coverage/
