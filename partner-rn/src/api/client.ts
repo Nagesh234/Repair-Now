@@ -20,10 +20,10 @@
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
 
 // Set API_BASE_URL in .env:
-//   Emulator → http://10.0.2.2:3000/api/
-//   Production → https://your-domain.com/api/
+//   Emulator   → API_BASE_URL=http://10.0.2.2:3000/api/
+//   Production → API_BASE_URL=https://repair-now.onrender.com/api/
 const API_BASE_URL: string =
-    process.env.API_BASE_URL ?? 'http://10.0.2.2:3000/api/';
+    process.env.API_BASE_URL ?? 'https://repair-now.onrender.com/api/';
 
 const apiClient: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
