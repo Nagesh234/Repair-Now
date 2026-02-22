@@ -8,11 +8,15 @@ yarn-error.log
 .yarn/
 
 # ─── Environment Variables ────────────────────────────────────────────────────
-# NEVER commit .env — copy from .env.example
-.env
-.env.example
-.env.local
-.env.production
+# NEVER commit .env files — copy from .env.example to get started
+**/.env
+**/.env.local
+**/.env.production
+**/.env.development
+**/.env.staging
+**/.env.test
+# .env.example IS committed (it's the safe template, no real secrets)
+!**/.env.example
 
 # ─── React Native ────────────────────────────────────────────────────────────
 *.keystore
@@ -42,4 +46,3 @@ Thumbs.db
 
 # ─── Test Coverage ───────────────────────────────────────────────────────────
 coverage/
-.env
